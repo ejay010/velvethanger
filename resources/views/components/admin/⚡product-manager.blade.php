@@ -3,8 +3,10 @@
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\Category;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Flux\Flux;
 
 new class extends Component {
@@ -23,6 +25,17 @@ new class extends Component {
     // Multiple file uploads and index of the selected featured image
     public $new_images = [];
     public int $featured_image_index = 0;
+
+    // Edit Modal State & Properties
+    public bool $showEditModal = false;
+    public ?int $editingProductId = null;
+    public string $edit_name = '';
+    public string $edit_category_id = '';
+    public string $edit_description = '';
+    public int $edit_price = 0;
+    public int $edit_stock_quantity = 0;
+    public bool $edit_is_active = true;
+    public $edit_new_images = [];
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -46,6 +59,16 @@ new class extends Component {
     public function getCategoriesProperty()
     {
         return Category::orderBy('name', 'asc')->get();
+    }
+
+    // Computed property to fetch the product currently being edited
+    public function getEditingProductProperty()
+    {
+        if (! $this->editingProductId) {
+            return null;
+        }
+
+        return Product::with(['category', 'images', 'featuredImage'])->find($this->editingProductId);
     }
 
     public function createProduct()
@@ -92,6 +115,118 @@ new class extends Component {
         $this->reset(['name', 'category_id', 'description', 'price', 'stock_quantity', 'is_active', 'new_images', 'featured_image_index']);
 
         Flux::toast('Product created successfully.', variant: 'success');
+    }
+
+    public function editProduct(int $productId)
+    {
+        $product = Product::with(['images', 'featuredImage'])->findOrFail($productId);
+
+        $this->editingProductId = $product->id;
+        $this->edit_name = $product->name;
+        $this->edit_category_id = (string) $product->category_id;
+        $this->edit_description = $product->description ?? '';
+        $this->edit_price = $product->price;
+        $this->edit_stock_quantity = $product->stock_quantity;
+        $this->edit_is_active = $product->is_active;
+        $this->edit_new_images = [];
+
+        $this->showEditModal = true;
+    }
+
+    public function updateProduct()
+    {
+        $this->validate([
+            'edit_name' => 'required|string|max:255',
+            'edit_category_id' => 'required|exists:categories,id',
+            'edit_description' => 'nullable|string',
+            'edit_price' => 'required|integer|min:0',
+            'edit_stock_quantity' => 'required|integer|min:0',
+            'edit_is_active' => 'boolean',
+            'edit_new_images.*' => 'image|max:2048',
+        ]);
+
+        $product = Product::findOrFail($this->editingProductId);
+
+        $product->update([
+            'name' => $this->edit_name,
+            'slug' => Str::slug($this->edit_name),
+            'category_id' => $this->edit_category_id,
+            'description' => $this->edit_description,
+            'price' => $this->edit_price,
+            'stock_quantity' => $this->edit_stock_quantity,
+            'is_active' => $this->edit_is_active,
+        ]);
+
+        // Upload any new images added during editing
+        if (! empty($this->edit_new_images)) {
+            $hasFeaturedAlready = $product->images()->where('is_featured', true)->exists();
+
+            foreach ($this->edit_new_images as $index => $imageFile) {
+                $path = $imageFile->store('products', 'public');
+                $isFeatured = (! $hasFeaturedAlready && $index === 0);
+
+                $product->images()->create([
+                    'image_path' => $path,
+                    'is_featured' => $isFeatured,
+                ]);
+
+                if ($isFeatured) {
+                    $product->update(['image_url' => $path]);
+                    $hasFeaturedAlready = true;
+                }
+            }
+        }
+
+        $this->reset(['edit_new_images']);
+        $this->showEditModal = false;
+
+        Flux::toast('Product updated successfully.', variant: 'success');
+    }
+
+    public function setFeaturedImage(int $imageId)
+    {
+        if (! $this->editingProductId) {
+            return;
+        }
+
+        $product = Product::findOrFail($this->editingProductId);
+
+        // Reset all images for this product to not featured
+        $product->images()->update(['is_featured' => false]);
+
+        // Set selected image as featured
+        $image = ProductImage::where('product_id', $product->id)->findOrFail($imageId);
+        $image->update(['is_featured' => true]);
+
+        // Sync main image_url on products table
+        $product->update(['image_url' => $image->image_path]);
+
+        Flux::toast('Featured image updated.');
+    }
+
+    public function deleteImage(int $imageId)
+    {
+        $image = ProductImage::findOrFail($imageId);
+        $product = Product::findOrFail($image->product_id);
+
+        if (Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+
+        $wasFeatured = $image->is_featured;
+        $image->delete();
+
+        if ($wasFeatured) {
+            $nextImage = $product->images()->first();
+            if ($nextImage) {
+                $nextImage->update(['is_featured' => true]);
+                $product->update(['image_url' => $nextImage->image_path]);
+            } else {
+                $product->update(['image_url' => null]);
+            }
+        }
+
+        Flux::toast('Image deleted.');
     }
 
     public function toggleActive(int $productId)
@@ -225,9 +360,14 @@ new class extends Component {
                                             @endif
                                         </td>
                                         <td class="py-3 text-right">
-                                            <flux:button size="sm" wire:click="toggleActive({{ $product->id }})">
-                                                Toggle Status
-                                            </flux:button>
+                                            <div class="flex items-center justify-end gap-2">
+                                                <flux:button size="sm" icon="pencil-square" wire:click="editProduct({{ $product->id }})">
+                                                    Edit
+                                                </flux:button>
+                                                <flux:button size="sm" wire:click="toggleActive({{ $product->id }})">
+                                                    Toggle Status
+                                                </flux:button>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -239,7 +379,70 @@ new class extends Component {
         </div>
 
     </div>
+
+    {{-- Edit Product Modal --}}
+    <flux:modal wire:model="showEditModal" class="max-w-2xl">
+        @if ($this->editingProduct)
+            <flux:heading size="lg" class="mb-4">Edit Product: {{ $this->editingProduct->name }}</flux:heading>
+
+            <form wire:submit.prevent="updateProduct" class="space-y-4">
+                <flux:input label="Product Name" wire:model="edit_name" required />
+
+                <flux:select label="Category" wire:model="edit_category_id" required>
+                    @foreach ($this->categories as $category)
+                        <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
+                    @endforeach
+                </flux:select>
+
+                <flux:textarea label="Description" wire:model="edit_description" />
+
+                <div class="grid grid-cols-2 gap-4">
+                    <flux:input type="number" label="Price (in cents)" wire:model="edit_price" required />
+                    <flux:input type="number" label="Stock Quantity" wire:model="edit_stock_quantity" min="0" required />
+                </div>
+
+                <flux:checkbox label="Is Active?" wire:model="edit_is_active" />
+
+                {{-- Existing Images Manager --}}
+                <div class="border-t pt-4 border-gray-200 dark:border-gray-700">
+                    <flux:label class="mb-2">Current Product Images:</flux:label>
+                    @if ($this->editingProduct->images->isEmpty())
+                        <p class="text-sm text-gray-500 mb-3">No images uploaded yet.</p>
+                    @else
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            @foreach ($this->editingProduct->images as $img)
+                                <div class="relative rounded-lg overflow-hidden border p-1 bg-zinc-50 dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700">
+                                    <img src="{{ Storage::url($img->image_path) }}" class="w-full h-20 object-cover rounded" />
+                                    <div class="mt-2 flex flex-col gap-1 text-center">
+                                        @if ($img->is_featured)
+                                            <flux:badge color="indigo" size="sm" class="justify-center">★ Featured</flux:badge>
+                                        @else
+                                            <flux:button size="xs" type="button" wire:click="setFeaturedImage({{ $img->id }})">
+                                                Set Featured
+                                            </flux:button>
+                                        @endif
+                                        <flux:button size="xs" variant="danger" type="button" wire:click="deleteImage({{ $img->id }})">
+                                            Delete
+                                        </flux:button>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <flux:input type="file" label="Add Supporting Images" wire:model="edit_new_images" multiple
+                        accept="image/jpeg,image/png,image/gif,image/jpg,image/webp,image/avif" />
+                </div>
+
+                <div class="flex justify-end gap-3 border-t pt-4 border-gray-200 dark:border-gray-700">
+                    <flux:button type="button" variant="ghost" wire:click="$set('showEditModal', false)">Cancel</flux:button>
+                    <flux:button type="submit" variant="primary">Save Changes</flux:button>
+                </div>
+            </form>
+        @endif
+    </flux:modal>
 </div>
+
 
 
 
