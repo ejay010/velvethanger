@@ -23,7 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/', function() {
+    Route::get('/', function () {
         return view('admin.dashboard');
     })->name('dashboard');
 
@@ -34,6 +34,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', function () {
         return view('admin.orders');
     })->name('orders');
+
+    Route::get('/category', function () {
+        return view('admin.category');
+    })->name('category');
 });
 
 require __DIR__.'/settings.php';
