@@ -33,6 +33,44 @@ class Product extends Model
     }
 
     /**
+     * Get all variants for this product.
+     */
+    public function variants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * Get active variants for this product.
+     */
+    public function activeVariants(): HasMany
+    {
+        return $this->hasMany(ProductVariant::class)->where('is_active', true);
+    }
+
+    /**
+     * Check if this product has any variants.
+     */
+    protected function hasVariants(): Attribute
+    {
+        return Attribute::get(fn () => $this->variants->count() > 0);
+    }
+
+    /**
+     * Get total available stock across variants or base product stock.
+     */
+    protected function totalStock(): Attribute
+    {
+        return Attribute::get(function () {
+            if ($this->has_variants) {
+                return $this->variants->where('is_active', true)->sum('stock_quantity');
+            }
+
+            return $this->stock_quantity;
+        });
+    }
+
+    /**
      * Get the featured image for this product.
      */
     public function featuredImage(): HasOne

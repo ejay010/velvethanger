@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Product;
 use Illuminate\Support\Facades\Session;
 
 class CartService
@@ -15,21 +16,29 @@ class CartService
     }
 
     /**
-     * Add a product to the cart or increment its quantity if it already exists.
+     * Add a product or variant to the cart.
      */
-    public function add(int $productId, int $quantity = 1, int $price = 0): void
+    public function add(int $productId, int $quantity = 1, int $price = 0, ?int $variantId = null, ?string $variantName = null, ?string $imageUrl = null): void
     {
         $cart = $this->getItems();
 
-        // If the product is already in the cart, increase the quantity
-        if (isset($cart[$productId])) {
-            $cart[$productId]['quantity'] += $quantity;
+        $key = $variantId ? "{$productId}:{$variantId}" : "{$productId}:0";
+
+        if (isset($cart[$key])) {
+            $cart[$key]['quantity'] += $quantity;
         } else {
-            // Otherwise, add it to the cart
-            $cart[$productId] = [
+            $product = Product::find($productId);
+            $productName = $product ? $product->name : "Product #{$productId}";
+
+            $cart[$key] = [
+                'key' => $key,
                 'product_id' => $productId,
+                'variant_id' => $variantId,
+                'product_name' => $productName,
+                'variant_name' => $variantName,
                 'quantity' => $quantity,
-                'price' => $price,
+                'price' => $price > 0 ? $price : ($product ? $product->price : 0),
+                'image_url' => $imageUrl ?? ($product ? $product->featured_image_url : null),
             ];
         }
 
@@ -37,14 +46,14 @@ class CartService
     }
 
     /**
-     * Remove an item entirely from the cart.
+     * Remove an item entirely from the cart by its unique item key.
      */
-    public function remove(int $productId): void
+    public function remove(string $key): void
     {
         $cart = $this->getItems();
 
-        if (isset($cart[$productId])) {
-            unset($cart[$productId]);
+        if (isset($cart[$key])) {
+            unset($cart[$key]);
             Session::put('cart', $cart);
         }
     }
