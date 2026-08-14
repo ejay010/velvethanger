@@ -14,6 +14,7 @@ new class extends Component {
     public string $name = '';
     public string $description = '';
     public int $price = 0; // Stored in cents
+    public int $stock_quantity = 0; // Available inventory for sale
     public bool $is_active = true;
 
     // Foreign key relationship property selected from the category dropdown
@@ -28,6 +29,7 @@ new class extends Component {
         'category_id' => 'required|exists:categories,id',
         'description' => 'nullable|string',
         'price' => 'required|integer|min:0',
+        'stock_quantity' => 'required|integer|min:0',
         'is_active' => 'boolean',
         'new_images.*' => 'image|max:2048',
     ];
@@ -50,13 +52,14 @@ new class extends Component {
     {
         $this->validate();
 
-        // 1. Create the base product record
+        // 1. Create the base product record with stock_quantity
         $product = Product::create([
             'name' => $this->name,
             'slug' => Str::slug($this->name),
             'category_id' => $this->category_id,
             'description' => $this->description,
             'price' => $this->price,
+            'stock_quantity' => $this->stock_quantity,
             'is_active' => $this->is_active,
         ]);
 
@@ -86,7 +89,7 @@ new class extends Component {
             }
         }
 
-        $this->reset(['name', 'category_id', 'description', 'price', 'is_active', 'new_images', 'featured_image_index']);
+        $this->reset(['name', 'category_id', 'description', 'price', 'stock_quantity', 'is_active', 'new_images', 'featured_image_index']);
 
         Flux::toast('Product created successfully.', variant: 'success');
     }
@@ -123,6 +126,9 @@ new class extends Component {
 
                     {{-- Prices are stored in cents --}}
                     <flux:input type="number" label="Price (in cents)" wire:model="price" required />
+
+                    {{-- Stock Quantity Available for Sale --}}
+                    <flux:input type="number" label="Stock Quantity (available for sale)" wire:model="stock_quantity" min="0" required />
 
                     {{-- Multiple Images Upload --}}
                     <div>
@@ -176,6 +182,7 @@ new class extends Component {
                                     <th class="py-2">Name</th>
                                     <th class="py-2">Category</th>
                                     <th class="py-2">Price</th>
+                                    <th class="py-2">Stock</th>
                                     <th class="py-2">Status</th>
                                     <th class="py-2 text-right">Actions</th>
                                 </tr>
@@ -203,6 +210,13 @@ new class extends Component {
                                             <flux:badge color="zinc">{{ $product->category->name ?? 'Uncategorized' }}</flux:badge>
                                         </td>
                                         <td class="py-3">${{ number_format($product->price / 100, 2) }}</td>
+                                        <td class="py-3 font-medium">
+                                            @if ($product->stock_quantity > 0)
+                                                <flux:badge color="zinc">{{ $product->stock_quantity }} in stock</flux:badge>
+                                            @else
+                                                <flux:badge color="red">Out of stock</flux:badge>
+                                            @endif
+                                        </td>
                                         <td class="py-3">
                                             @if ($product->is_active)
                                                 <flux:badge color="green">Active</flux:badge>
@@ -226,5 +240,6 @@ new class extends Component {
 
     </div>
 </div>
+
 
 

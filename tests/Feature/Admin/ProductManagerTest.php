@@ -12,7 +12,7 @@ it('renders product manager component with existing categories', function () {
         ->assertSee('Handbags');
 });
 
-it('creates a product with an assigned category', function () {
+it('creates a product with an assigned category and stock quantity', function () {
     $category = Category::factory()->create(['name' => 'Jewelry']);
 
     Livewire::test('admin.product-manager')
@@ -20,17 +20,19 @@ it('creates a product with an assigned category', function () {
         ->set('category_id', $category->id)
         ->set('description', 'Elegant 14k gold necklace.')
         ->set('price', 4500)
+        ->set('stock_quantity', 15)
         ->set('is_active', true)
         ->call('createProduct')
         ->assertHasNoErrors()
         ->assertSet('name', '')
-        ->assertSet('category_id', '');
+        ->assertSet('category_id', '')
+        ->assertSet('stock_quantity', 0);
 
     $product = Product::where('name', 'Gold Necklace')->first();
 
     expect($product)->not->toBeNull();
     expect($product->category_id)->toBe($category->id);
-    expect($product->category->name)->toBe('Jewelry');
+    expect($product->stock_quantity)->toBe(15);
 });
 
 it('requires category_id to create a product', function () {
