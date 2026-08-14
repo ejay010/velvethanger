@@ -22,7 +22,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+// First-Time Admin Setup Route (accessible when no admin user exists)
+Route::get('/admin/setup', function () {
+    return view('admin.setup');
+})->name('admin.setup');
+
+Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
+
     Route::get('/', function () {
         return view('admin.dashboard');
     })->name('dashboard');
