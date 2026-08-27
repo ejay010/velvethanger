@@ -48,7 +48,13 @@ new class extends Component
 
         // 3. Process the checkout and save the order in the database
         // Auth::id() will return null if they are a guest, which our schema allows
-        $order = $orderService->processCheckout(Auth::id(), $this->cartItems, $this->total);
+        $customerDetails = [
+            'name' => $this->name,
+            'email' => $this->email,
+            'address' => $this->address,
+        ];
+        
+        $order = $orderService->processCheckout(Auth::id(), $this->cartItems, $this->total, $customerDetails);
 
         // 4. Clear the cart since the order is placed
         $cartService->clear();

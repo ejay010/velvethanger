@@ -80,4 +80,19 @@ class CartService
 
         return $total;
     }
+
+    /**
+     * Calculate the total number of items in the cart.
+     */
+    public function getTotalQuantity(): int
+    {
+        $cart = $this->getItems();
+        $quantity = 0;
+
+        foreach ($cart as $item) {
+            $quantity += $item['quantity'];
+        }
+
+        return $quantity;
+    }
 }

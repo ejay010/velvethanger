@@ -12,6 +12,8 @@ class Category extends Model
 
     protected $guarded = [];
 
+
+
     /**
      * Get the products belonging to this category.
      */

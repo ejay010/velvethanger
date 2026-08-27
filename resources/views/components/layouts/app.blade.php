@@ -12,8 +12,8 @@
             <flux:navbar.item icon="home" :href="route('home')" :current="request()->routeIs('home')" wire:navigate>
                 {{ __('Home') }}
             </flux:navbar.item>
-            <flux:navbar.item icon="shopping-bag" :href="route('cart')" :current="request()->routeIs('cart')" wire:navigate>
-                {{ __('Cart') }}
+            <flux:navbar.item :href="route('cart')" :current="request()->routeIs('cart')" wire:navigate>
+                <livewire:storefront.cart-badge />
             </flux:navbar.item>
         </flux:navbar>
 

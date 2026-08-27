@@ -33,6 +33,10 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
         return view('admin.dashboard');
     })->name('dashboard');
 
+    Route::get('/categories', function () {
+        return view('admin.categories');
+    })->name('categories');
+
     Route::get('/products', function () {
         return view('admin.products');
     })->name('products');

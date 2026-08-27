@@ -62,6 +62,7 @@ new class extends Component
             imageUrl: $imageUrl
         );
 
+        $this->dispatch('cart-updated');
         Flux::toast('Added to cart!');
         $this->quantity = 1;
     }

@@ -25,6 +25,7 @@ new class extends Component
     {
         $cartService->remove($key);
         $this->loadCart($cartService);
+        $this->dispatch('cart-updated');
     }
 };
 ?>
