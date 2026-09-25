@@ -21,12 +21,7 @@ new class extends Component
 };
 ?>
 
-<div class="relative inline-flex items-center">
-    <flux:icon.shopping-bag class="w-5 h-5 mr-1" />
-    <span>Cart</span>
-    @if($cartCount > 0)
-        <span class="absolute -top-2 -right-3 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-600 rounded-full">
-            {{ $cartCount }}
-        </span>
-    @endif
+<div class="relative inline-flex items-center gap-1.5 text-xs tracking-widest font-medium uppercase text-zinc-900 dark:text-zinc-100 hover:text-amber-700 transition-colors">
+    <flux:icon.shopping-bag class="w-4 h-4 stroke-[1.5]" />
+    <span class="font-sans">({{ $cartCount }})</span>
 </div>

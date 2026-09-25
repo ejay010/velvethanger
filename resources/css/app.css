@@ -9,7 +9,15 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Montserrat', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+    --font-serif: 'Playfair Display', 'Cormorant Garamond', Georgia, serif;
+
+    --color-velvet-dark: #0f0f0f;
+    --color-velvet-espresso: #1a1715;
+    --color-velvet-cream: #faf7f2;
+    --color-velvet-sand: #f3ede2;
+    --color-velvet-gold: #c5a880;
+    --color-velvet-terracotta: #d96b5a;
 
     --color-zinc-50: #fafafa;
     --color-zinc-100: #f5f5f5;

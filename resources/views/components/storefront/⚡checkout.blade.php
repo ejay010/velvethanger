@@ -54,14 +54,22 @@ new class extends Component
             'address' => $this->address,
         ];
         
-        $order = $orderService->processCheckout(Auth::id(), $this->cartItems, $this->total, $customerDetails);
+        try {
+            $order = $orderService->processCheckout(Auth::id(), $this->cartItems, $this->total, $customerDetails);
+        } catch (\Exception $e) {
+            Flux::toast($e->getMessage(), variant: 'danger');
+            $this->addError('stock', $e->getMessage());
+            return;
+        }
 
         // 4. Clear the cart since the order is placed
         $cartService->clear();
 
-        // 5. Redirect the user to the home page with a success message
-        session()->flash('message', 'Order placed successfully! Reference: ' . $order->id);
-        return redirect('/');
+        // 5. Redirect the user to order lookup page with their reference
+        return redirect()->route('order.lookup', [
+            'order_id' => $order->id,
+            'email' => $this->email,
+        ])->with('success', 'Order placed successfully! Please present your Order #' . $order->id . ' when collecting in-store.');
     }
 };
 ?>

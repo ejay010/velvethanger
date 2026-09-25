@@ -59,6 +59,25 @@ class CartService
     }
 
     /**
+     * Update the quantity of a specific item in the cart.
+     */
+    public function updateQuantity(string $key, int $quantity): void
+    {
+        if ($quantity <= 0) {
+            $this->remove($key);
+
+            return;
+        }
+
+        $cart = $this->getItems();
+
+        if (isset($cart[$key])) {
+            $cart[$key]['quantity'] = $quantity;
+            Session::put('cart', $cart);
+        }
+    }
+
+    /**
      * Clear the entire cart from the session.
      */
     public function clear(): void

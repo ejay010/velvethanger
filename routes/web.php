@@ -18,6 +18,17 @@ Route::get('/cart', function () {
 Route::get('/checkout', function () {
     return view('shop.checkout');
 })->name('checkout');
+
+Route::get('/order-lookup', function () {
+    return view('shop.order-lookup');
+})->name('order.lookup');
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders', function () {
+        return view('shop.orders');
+    })->name('customer.orders');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });
