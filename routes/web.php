@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Page;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,10 @@ Route::get('/checkout', function () {
 Route::get('/order-lookup', function () {
     return view('shop.order-lookup');
 })->name('order.lookup');
+
+Route::get('/pages/{page:slug}', function (Page $page) {
+    return view('shop.page', ['page' => $page]);
+})->name('page.show');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/orders', function () {
@@ -55,6 +60,14 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::get('/orders', function () {
         return view('admin.orders');
     })->name('orders');
+
+    Route::get('/content', function () {
+        return view('admin.content');
+    })->name('content');
+
+    Route::get('/pages', function () {
+        return view('admin.pages');
+    })->name('pages');
 
     Route::get('/category', function () {
         return view('admin.category');

@@ -18,13 +18,21 @@
             <flux:sidebar.item icon="squares-2x2" href="{{ route('admin.dashboard') }}"
                 :current="request()->routeIs('admin.dashboard')">Dashboard
             </flux:sidebar.item>
-            <flux:sidebar.item icon="rectangle-stack" badge="12" href="{{ route('admin.products') }}"
+            <flux:sidebar.item icon="rectangle-stack" href="{{ route('admin.products') }}"
                 :current="request()->routeIs('admin.products')">Products
+            </flux:sidebar.item>
+            <flux:sidebar.item icon="tag" href="{{ route('admin.category') }}"
+                :current="request()->routeIs('admin.category')">Categories
             </flux:sidebar.item>
             <flux:sidebar.item icon="document-currency-dollar" href="{{ route('admin.orders') }}"
                 :current="request()->routeIs('admin.orders')">Orders
             </flux:sidebar.item>
-            <flux:sidebar.item icon="chart-bar" href="#">Reports</flux:sidebar.item>
+            <flux:sidebar.item icon="paint-brush" href="{{ route('admin.content') }}"
+                :current="request()->routeIs('admin.content')">Storefront Content
+            </flux:sidebar.item>
+            <flux:sidebar.item icon="document-text" href="{{ route('admin.pages') }}"
+                :current="request()->routeIs('admin.pages')">Custom Pages
+            </flux:sidebar.item>
         </flux:sidebar.nav>
 
         <flux:sidebar.spacer />

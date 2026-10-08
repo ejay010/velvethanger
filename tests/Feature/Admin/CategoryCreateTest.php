@@ -49,3 +49,60 @@ it('can upload a category image', function () {
     expect($category->image_url)->not->toBeNull();
     Storage::disk('public')->assertExists($category->image_url);
 });
+
+it('can edit a category and update its featured image in category manager', function () {
+    Storage::fake('public');
+
+    $category = Category::create([
+        'name' => 'Accessories',
+        'slug' => 'accessories',
+        'description' => 'Fine jewelry & accessories',
+        'image_url' => null,
+    ]);
+
+    expect($category->featured_image_url)->toContain('images.unsplash.com');
+
+    // 1. Edit with custom web URL
+    Livewire::test('admin.category-manager')
+        ->call('editCategory', $category->id)
+        ->set('custom_image_url', 'https://images.unsplash.com/photo-custom-necklace')
+        ->call('saveCategory')
+        ->assertHasNoErrors();
+
+    expect($category->fresh()->image_url)->toBe('https://images.unsplash.com/photo-custom-necklace');
+    expect($category->fresh()->featured_image_url)->toBe('https://images.unsplash.com/photo-custom-necklace');
+
+    // 2. Edit with uploaded image
+    $file = UploadedFile::fake()->image('necklace.jpg');
+
+    Livewire::test('admin.category-manager')
+        ->call('editCategory', $category->id)
+        ->set('image', $file)
+        ->call('saveCategory')
+        ->assertHasNoErrors();
+
+    $fresh = $category->fresh();
+    expect($fresh->image_url)->toStartWith('/storage/categories/');
+    expect($fresh->featured_image_url)->toStartWith('/storage/categories/');
+
+    // 3. Remove image
+    Livewire::test('admin.category-manager')
+        ->call('editCategory', $category->id)
+        ->call('removeImage')
+        ->assertHasNoErrors();
+
+    expect($category->fresh()->image_url)->toBeNull();
+});
+
+it('can delete a category in category manager', function () {
+    $category = Category::create([
+        'name' => 'Footwear',
+        'slug' => 'footwear',
+    ]);
+
+    Livewire::test('admin.category-manager')
+        ->call('deleteCategory', $category->id)
+        ->assertHasNoErrors();
+
+    expect(Category::find($category->id))->toBeNull();
+});

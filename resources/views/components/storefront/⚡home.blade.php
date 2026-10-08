@@ -54,7 +54,22 @@ new class extends Component
 ?>
 
 <div class="space-y-16 pb-16">
-    
+    @php
+        use App\Models\SiteSetting;
+
+        $heroEyebrow = SiteSetting::get('hero_eyebrow', 'Effortless Elegance. Uniquely You.');
+        $heroHeadline = SiteSetting::get('hero_headline', 'The Velvet Lifestyle');
+        $heroSubtitle = SiteSetting::get('hero_subtitle', 'Timeless style. Modern edge. Designed for women who dress with confidence.');
+        $heroCtaText = SiteSetting::get('hero_cta_text', 'Shop New Arrivals');
+        $heroCtaLink = SiteSetting::get('hero_cta_link', '#featured-collection');
+        $heroImage = SiteSetting::get('hero_image', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1200&auto=format&fit=crop');
+
+        $aboutHeading = SiteSetting::get('about_heading', 'About The Velvet Lifestyle');
+        $aboutBody = SiteSetting::get('about_body', 'For over 15 years, The Velvet Lifestyle has been Nassau\'s premier destination for chic, sophisticated style. We curate collections that empower women to look and feel their best—every day and every occasion.');
+        $aboutButtonText = SiteSetting::get('about_button_text', 'Our Story');
+        $aboutImage = SiteSetting::get('about_image', 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop');
+    @endphp
+
     {{-- 1. Editorial Luxury Hero Banner --}}
     <section class="relative bg-[#171412] text-white overflow-hidden">
         <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 min-h-[560px] lg:min-h-[640px] items-center">
@@ -63,24 +78,22 @@ new class extends Component
             <div class="lg:col-span-6 px-6 sm:px-12 py-16 lg:py-24 z-10 space-y-6">
                 <div class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.3em] text-[#d4af37] flex items-center gap-3">
                     <span class="w-8 h-px bg-[#d4af37]/60"></span>
-                    Effortless Elegance. Uniquely You.
+                    {{ $heroEyebrow }}
                 </div>
 
                 <div class="space-y-2">
                     <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl tracking-[0.15em] uppercase font-normal leading-[1.1] text-white">
-                        The<br />
-                        <span class="font-light tracking-[0.18em]">Velvet</span><br />
-                        Lifestyle
+                        {!! nl2br(e($heroHeadline)) !!}
                     </h1>
                 </div>
 
                 <p class="text-sm sm:text-base text-zinc-300 font-light max-w-md leading-relaxed">
-                    Timeless style. Modern edge. Designed for women who dress with confidence.
+                    {{ $heroSubtitle }}
                 </p>
 
                 <div class="pt-4">
-                    <a href="#featured-collection" class="inline-block bg-white hover:bg-zinc-100 text-black px-8 py-3.5 text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.02]">
-                        Shop New Arrivals
+                    <a href="{{ $heroCtaLink }}" class="inline-block bg-white hover:bg-zinc-100 text-black px-8 py-3.5 text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.02]">
+                        {{ $heroCtaText }}
                     </a>
                 </div>
             </div>
@@ -88,8 +101,8 @@ new class extends Component
             {{-- Right: High Fashion Editorial Model Photography --}}
             <div class="lg:col-span-6 relative h-96 lg:h-full min-h-[420px] lg:min-h-[640px]">
                 <img 
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1200&auto=format&fit=crop" 
-                    alt="The Velvet Lifestyle Editorial Model" 
+                    src="{{ $heroImage }}" 
+                    alt="{{ $heroHeadline }}" 
                     class="w-full h-full object-cover object-top filter brightness-95 contrast-105"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t lg:bg-gradient-to-r from-[#171412] via-transparent to-transparent opacity-90 lg:opacity-80"></div>
@@ -160,90 +173,23 @@ new class extends Component
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-            {{-- Category 1: Dresses --}}
-            <button type="button" wire:click="setCategory('dresses')" class="group text-center focus:outline-none">
-                <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
-                    <img 
-                        src="https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=600&auto=format&fit=crop" 
-                        alt="Dresses Collection" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                </div>
-                <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
-                    Dresses
-                </div>
-                <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
-                    Shop Now
-                </div>
-            </button>
-
-            {{-- Category 2: Tops --}}
-            <button type="button" wire:click="setCategory('tops')" class="group text-center focus:outline-none">
-                <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
-                    <img 
-                        src="https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?q=80&w=600&auto=format&fit=crop" 
-                        alt="Tops Collection" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                </div>
-                <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
-                    Tops
-                </div>
-                <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
-                    Shop Now
-                </div>
-            </button>
-
-            {{-- Category 3: Bottoms --}}
-            <button type="button" wire:click="setCategory('bottoms')" class="group text-center focus:outline-none">
-                <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
-                    <img 
-                        src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop" 
-                        alt="Bottoms Collection" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                </div>
-                <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
-                    Bottoms
-                </div>
-                <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
-                    Shop Now
-                </div>
-            </button>
-
-            {{-- Category 4: Accessories --}}
-            <button type="button" wire:click="setCategory('accessories')" class="group text-center focus:outline-none">
-                <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
-                    <img 
-                        src="https://images.unsplash.com/photo-1584917865442-de89df76afd3?q=80&w=600&auto=format&fit=crop" 
-                        alt="Accessories Collection" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                </div>
-                <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
-                    Accessories
-                </div>
-                <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
-                    Shop Now
-                </div>
-            </button>
-
-            {{-- Category 5: Shoes --}}
-            <button type="button" wire:click="setCategory('shoes')" class="group text-center focus:outline-none col-span-2 sm:col-span-1">
-                <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
-                    <img 
-                        src="https://images.unsplash.com/photo-1543163521-1bf539c55dd2?q=80&w=600&auto=format&fit=crop" 
-                        alt="Shoes Collection" 
-                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                    />
-                </div>
-                <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
-                    Shoes
-                </div>
-                <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
-                    Shop Now
-                </div>
-            </button>
+            @foreach($this->categories->take(5) as $cat)
+                <button type="button" wire:click="setCategory('{{ $cat->slug }}')" class="group text-center focus:outline-none">
+                    <div class="aspect-[3/4] bg-zinc-200 overflow-hidden mb-3 shadow-xs">
+                        <img 
+                            src="{{ $cat->featured_image_url }}" 
+                            alt="{{ $cat->name }}" 
+                            class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                        />
+                    </div>
+                    <div class="font-serif text-sm tracking-[0.2em] uppercase font-medium text-zinc-900 group-hover:text-amber-800 transition-colors">
+                        {{ $cat->name }}
+                    </div>
+                    <div class="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-0.5">
+                        Shop Now
+                    </div>
+                </button>
+            @endforeach
         </div>
     </section>
 
@@ -343,16 +289,16 @@ new class extends Component
             {{-- Left: Text & Bio Card --}}
             <div class="lg:col-span-6 space-y-6 lg:pr-6">
                 <h3 class="font-serif text-2xl sm:text-3xl tracking-[0.2em] uppercase font-normal text-zinc-950 leading-snug">
-                    About The Velvet Lifestyle
+                    {{ $aboutHeading }}
                 </h3>
 
                 <p class="text-xs sm:text-sm text-zinc-600 leading-relaxed font-light">
-                    For over 15 years, The Velvet Lifestyle has been Nassau's premier destination for chic, sophisticated style. We curate collections that empower women to look and feel their best—every day and every occasion.
+                    {{ $aboutBody }}
                 </p>
 
                 <div class="pt-2">
-                    <a href="#footer-contact" class="inline-block bg-black hover:bg-zinc-800 text-white px-7 py-3 text-xs font-semibold tracking-[0.25em] uppercase transition-colors">
-                        Our Story
+                    <a href="/pages/about" class="inline-block bg-black hover:bg-zinc-800 text-white px-7 py-3 text-xs font-semibold tracking-[0.25em] uppercase transition-colors" wire:navigate>
+                        {{ $aboutButtonText }}
                     </a>
                 </div>
             </div>
@@ -360,8 +306,8 @@ new class extends Component
             {{-- Right: Storefront / Interior Architecture Photography --}}
             <div class="lg:col-span-6 aspect-[4/3] lg:aspect-[16/10] overflow-hidden bg-zinc-200">
                 <img 
-                    src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1000&auto=format&fit=crop" 
-                    alt="The Velvet Lifestyle Nassau Boutique" 
+                    src="{{ $aboutImage }}" 
+                    alt="{{ $aboutHeading }}" 
                     class="w-full h-full object-cover filter brightness-95"
                 />
             </div>
