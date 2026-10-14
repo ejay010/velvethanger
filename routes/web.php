@@ -2,6 +2,7 @@
 
 use App\Models\Page;
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -38,8 +39,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
 });
 
-// First-Time Admin Setup Route (accessible when no admin user exists)
+// First-Time Admin Setup Routes (similar to WordPress install.php)
+Route::redirect('/setup', '/admin/setup');
+
 Route::get('/admin/setup', function () {
+    // Educational Comment: If an admin user already exists, lock this route
+    // and redirect to the dashboard (or login) to prevent unauthorized access.
+    if (User::where('is_admin', true)->exists()) {
+        return redirect()->route('admin.dashboard');
+    }
+
     return view('admin.setup');
 })->name('admin.setup');
 

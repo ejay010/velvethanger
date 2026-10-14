@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
@@ -50,6 +51,31 @@ it('locks /admin/setup and redirects once an admin user already exists', functio
         'is_admin' => true,
     ]);
 
+    // Livewire component mount redirect
     Livewire::test('admin.setup')
         ->assertRedirect(route('admin.dashboard'));
+
+    // HTTP Route redirect
+    $response = $this->get('/admin/setup');
+    $response->assertRedirect(route('admin.dashboard'));
+});
+
+it('redirects /setup alias route to /admin/setup', function () {
+    $response = $this->get('/setup');
+    $response->assertRedirect('/admin/setup');
+});
+
+it('saves custom store title into SiteSetting during setup', function () {
+    User::where('is_admin', true)->delete();
+
+    Livewire::test('admin.setup')
+        ->set('site_title', 'Velvet Hanger Boutique Nassau')
+        ->set('name', 'Velvet Owner')
+        ->set('email', 'boutique@velvethanger.com')
+        ->set('password', 'SecretPassword123!')
+        ->set('password_confirmation', 'SecretPassword123!')
+        ->call('createAdminAccount')
+        ->assertRedirect(route('admin.dashboard'));
+
+    expect(SiteSetting::get('store_name'))->toBe('Velvet Hanger Boutique Nassau');
 });
